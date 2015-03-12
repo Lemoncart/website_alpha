@@ -6,22 +6,22 @@ demoApp.config(function ($routeProvider){
 	$routeProvider
 	.when('/',
 	{
-		controller:'SimpleController',
+		controller:'PinController',
 		templateUrl:'Partials/index.html'
 		})
 	.when('/index1',
 	{
-		controller:'SimpleController',
+		controller:'PinController',
 		templateUrl:'Partials/index1.html'
 		})
 	.when('/index2',
 	{
-		controller:'SimpleController',
+		controller:'PinController',
 		templateUrl:'Partials/index2.html'
 		})
 	.when('/index3',
 	{
-		controller:'SimpleController',
+		controller:'VendorController',
 		templateUrl:'Partials/index3.html'
 		})
 	.otherwise({ redirectTo:'/index.html'});
@@ -49,7 +49,8 @@ demoApp.factory('UserService', function() {
     return userService;
 });
 
-demoApp.controller('SimpleController',['$scope','$location','$http','UserService', function($scope, $location,$http,UserService){
+
+demoApp.controller('PinController',['$scope','$location','$http','UserService', function($scope, $location,$http,UserService){
 	
 	var availPins = [600036, 673638];
 	var count=0;
@@ -58,12 +59,11 @@ demoApp.controller('SimpleController',['$scope','$location','$http','UserService
 	{
 	
 		var isTrue = false;
-		console.log('Fn is called');
 		UserService.ChangeName($scope.pin);
 
 		for (var i = availPins.length - 1; i >= 0; i--) {
 			if (availPins[i] == $scope.pin){
-				console.log('Correct you bitch');
+
 				isTrue = true;
 			}
 		};
@@ -88,15 +88,16 @@ demoApp.controller('SimpleController',['$scope','$location','$http','UserService
 		
 	}
 	
+	
 
+	
 	$scope.register=function()
 	{
 		count=UserService.pin;
 		UserService.Changeval();
-		console.log({ pin: UserService.pin , email: UserService.email });
 		var req = 
 		{  	 method: 'POST',
-			 url: '/test/api/getEmail.php', 
+			 url: 'api/getEmail.php', 
 			 headers: { 'Content-Type':'application/x-www-form-urlencoded' },
 			 data: $.param({ pin: UserService.pin , email: UserService.email }),
 		 } 
@@ -104,23 +105,11 @@ demoApp.controller('SimpleController',['$scope','$location','$http','UserService
 		 $http(req)
 		 .success(
 		 	function(response){
-		 		console.log(response);
-		 		if (response.status == "success"){
-		    			console.log("correct");
-		    	}
-		    	else if (response.status == "wrong_password"){
-		    			console.log("Incorrect");
-		    	} 
-		    	else if (response.status == "no_user"){
-		    			console.log("No User");
-		    	}
+		 		
 		 	})
 		 .error(
 		 	function(response){
-		 		console.log(response);
-		 		  // called asynchronously if an error occurs
-				    // or server returns response with an error status.
-				    console.log("No Internet Connection");
+		 		
 		 	});
 		 $scope.check();
 	}
@@ -137,5 +126,25 @@ demoApp.controller('SimpleController',['$scope','$location','$http','UserService
 	{
 		return UserService.valid;
 	}
+}]);
+
+demoApp.controller('VendorController',['$scope','$location','$http','UserService', function($scope, $location,$http,UserService){
+function myFunc(){
+			var toBeSendData = $.param({pin : UserService.pin });
+				$http({
+		    		method: 'POST', 
+		    		url: 'api/getMyVendors.php',
+		    		data:  toBeSendData,
+		    		headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+			    }).
+			  	success(function(response) {
+		    		$scope.vendors = response.data;
+		    		return response;
+		  		}).
+		 		error(function(response) {
+		  		});
+		};
+
+		$scope.vendors = myFunc();
 }]);
 })();
