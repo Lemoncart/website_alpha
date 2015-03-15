@@ -6,22 +6,22 @@ demoApp.config(function ($routeProvider){
 	$routeProvider
 	.when('/',
 	{
-		controller:'PinController',
+		controller:'SimpleController',
 		templateUrl:'Partials/index.html'
 		})
 	.when('/index1',
 	{
-		controller:'PinController',
+		controller:'SimpleController',
 		templateUrl:'Partials/index1.html'
 		})
 	.when('/index2',
 	{
-		controller:'PinController',
+		controller:'SimpleController',
 		templateUrl:'Partials/index2.html'
 		})
 	.when('/index3',
 	{
-		controller:'VendorController',
+		controller:'SimpleController',
 		templateUrl:'Partials/index3.html'
 		})
 	.otherwise({ redirectTo:'/index.html'});
@@ -41,7 +41,7 @@ demoApp.factory('UserService', function() {
 
        userService.email = value;
     };
-    userService.Changeval = function () {
+    userService.Changeval = function (value) {
 
        userService.valid = true;
     };
@@ -49,8 +49,7 @@ demoApp.factory('UserService', function() {
     return userService;
 });
 
-
-demoApp.controller('PinController',['$scope','$location','$http','UserService', function($scope, $location,$http,UserService){
+demoApp.controller('SimpleController',['$scope','$location','$http','UserService', function($scope, $location,$http,UserService){
 	
 	var availPins = [600036, 673638];
 	var count=0;
@@ -59,11 +58,12 @@ demoApp.controller('PinController',['$scope','$location','$http','UserService', 
 	{
 	
 		var isTrue = false;
+		console.log('Fn is called');
 		UserService.ChangeName($scope.pin);
 
 		for (var i = availPins.length - 1; i >= 0; i--) {
 			if (availPins[i] == $scope.pin){
-
+				console.log('Correct you bitch');
 				isTrue = true;
 			}
 		};
@@ -79,25 +79,22 @@ demoApp.controller('PinController',['$scope','$location','$http','UserService', 
 	$scope.pass=function()
 	{
 		UserService.ChangeEmail($scope.email);
-		
+		UserService.Changeval();
 	}
 
 	$scope.check=function()
 	{
 		$location.path('/'+'index2');
-		
 	}
 	
-	
 
-	
 	$scope.register=function()
 	{
 		count=UserService.pin;
-		UserService.Changeval();
+		console.log({ pin: UserService.pin , email: UserService.email });
 		var req = 
 		{  	 method: 'POST',
-			 url: 'api/getEmail.php', 
+			 url: '/test/api/getEmail.php', 
 			 headers: { 'Content-Type':'application/x-www-form-urlencoded' },
 			 data: $.param({ pin: UserService.pin , email: UserService.email }),
 		 } 
@@ -105,11 +102,23 @@ demoApp.controller('PinController',['$scope','$location','$http','UserService', 
 		 $http(req)
 		 .success(
 		 	function(response){
-		 		
+		 		console.log(response);
+		 		if (response.status == "success"){
+		    			console.log("correct");
+		    	}
+		    	else if (response.status == "wrong_password"){
+		    			console.log("Incorrect");
+		    	} 
+		    	else if (response.status == "no_user"){
+		    			console.log("No User");
+		    	}
 		 	})
 		 .error(
 		 	function(response){
-		 		
+		 		console.log(response);
+		 		  // called asynchronously if an error occurs
+				    // or server returns response with an error status.
+				    console.log("No Internet Connection");
 		 	});
 		 $scope.check();
 	}
@@ -124,27 +133,7 @@ demoApp.controller('PinController',['$scope','$location','$http','UserService', 
 	}
 	$scope.getval=function()
 	{
-		return UserService.valid;
+		return UserService.getval;
 	}
-}]);
-
-demoApp.controller('VendorController',['$scope','$location','$http','UserService', function($scope, $location,$http,UserService){
-function myFunc(){
-			var toBeSendData = $.param({pin : UserService.pin });
-				$http({
-		    		method: 'POST', 
-		    		url: 'api/getMyVendors.php',
-		    		data:  toBeSendData,
-		    		headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-			    }).
-			  	success(function(response) {
-		    		$scope.vendors = response.data;
-		    		return response;
-		  		}).
-		 		error(function(response) {
-		  		});
-		};
-
-		$scope.vendors = myFunc();
 }]);
 })();

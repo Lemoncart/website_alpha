@@ -1,5 +1,5 @@
 <?php 
-	$connection = mysql_connect("localhost","root","aruniitian");
+	$connection = mysql_connect("localhost","root","l");
 	if (!$connection){
 		die("DataBase Connection encountered a problem"  . mysql_error());
 	}
